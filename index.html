@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>WATCHVAULT — Watch Intelligence</title>
+<style>
+  :root { --bg:#0b0d10; --panel:#13171c; --panel2:#191f25; --text:#f5f1e8; --muted:#a7afb7; --gold:#d6b56d; --line:#2b323a; --green:#9fc6aa; }
+  * { box-sizing:border-box; }
+  body { margin:0; background:radial-gradient(circle at 80% 0%, #202019 0, transparent 32%),var(--bg); color:var(--text); font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif; }
+  header { display:flex; align-items:center; justify-content:space-between; padding:22px clamp(18px,5vw,72px); border-bottom:1px solid var(--line); }
+  .brand { letter-spacing:.2em; font-weight:800; font-size:1.02rem; } .brand span { color:var(--gold); }
+  .tag { color:var(--muted); font-size:.8rem; letter-spacing:.12em; text-transform:uppercase; }
+  main { max-width:1120px; margin:0 auto; padding:58px 22px 70px; }
+  .eyebrow { color:var(--gold); font-size:.76rem; letter-spacing:.22em; text-transform:uppercase; font-weight:700; }
+  h1 { font-size:clamp(2.6rem,7vw,5.4rem); letter-spacing:-.055em; line-height:.98; margin:16px 0 18px; max-width:800px; }
+  h1 em { color:var(--gold); font-style:normal; }
+  .intro { color:var(--muted); max-width:650px; line-height:1.7; font-size:1.02rem; }
+  .searchbox { display:flex; gap:10px; margin:30px 0 14px; padding:8px; background:var(--panel); border:1px solid #41464b; border-radius:15px; max-width:820px; box-shadow:0 16px 60px #0005; }
+  .searchbox input { flex:1; min-width:0; background:transparent; color:var(--text); border:0; outline:0; padding:14px 13px; font-size:1rem; }
+  button { cursor:pointer; border:0; border-radius:10px; padding:0 22px; background:var(--gold); color:#16140f; font-weight:800; font-size:.92rem; }
+  button:disabled { opacity:.6; cursor:wait; }
+  .hint { color:#818991; font-size:.82rem; margin-bottom:30px; }
+  .chips { display:flex; flex-wrap:wrap; gap:9px; margin:12px 0 32px; }
+  .chip { background:transparent; color:#c9cdd1; border:1px solid var(--line); border-radius:999px; padding:9px 13px; font-size:.82rem; }
+  .chip:hover { border-color:var(--gold); color:var(--gold); }
+  .status { color:var(--muted); min-height:24px; font-size:.9rem; margin:14px 0; }
+  .result { display:none; grid-template-columns:minmax(0,1fr) minmax(0,1.3fr); gap:26px; margin-top:20px; }
+  .visual { background:linear-gradient(145deg,#24241f,#121519 60%); border:1px solid var(--line); border-radius:20px; min-height:360px; padding:24px; display:flex; flex-direction:column; justify-content:space-between; overflow:hidden; }
+  .visual img { width:100%; height:250px; object-fit:contain; border-radius:12px; display:none; }
+  .watch-icon { font-size:7rem; text-align:center; color:var(--gold); line-height:1.2; margin:30px 0; }
+  .visual-foot { color:var(--muted); font-size:.8rem; line-height:1.5; }
+  .details { background:var(--panel); border:1px solid var(--line); border-radius:20px; padding:clamp(20px,4vw,34px); }
+  .kicker { color:var(--gold); font-size:.75rem; letter-spacing:.16em; text-transform:uppercase; font-weight:800; }
+  h2 { margin:10px 0 6px; font-size:clamp(1.8rem,4vw,3rem); letter-spacing:-.04em; line-height:1.05; }
+  .subhead { color:var(--muted); margin:0 0 22px; }
+  .description { color:#d7dadd; line-height:1.7; }
+  .specs { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:10px; margin:22px 0; }
+  .spec { background:var(--panel2); padding:14px; border-radius:12px; border:1px solid #252c32; min-width:0; }
+  .spec small { display:block; color:var(--muted); text-transform:uppercase; letter-spacing:.1em; font-size:.67rem; margin-bottom:7px; }
+  .spec strong { font-size:.94rem; line-height:1.4; overflow-wrap:anywhere; }
+  .section-title { margin:24px 0 9px; font-size:.9rem; }
+  .note { background:#211f18; border-left:3px solid var(--gold); padding:13px 15px; color:#d8d0bc; border-radius:0 10px 10px 0; line-height:1.55; font-size:.84rem; }
+  .source { display:inline-block; margin-top:17px; color:var(--gold); text-decoration:none; border-bottom:1px solid #806d42; padding-bottom:3px; font-size:.86rem; }
+  .source:hover { color:#f4d99c; }
+  .featured { margin-top:55px; }
+  .featured h3 { font-size:1.25rem; margin-bottom:8px; }
+  .featured p { color:var(--muted); margin-top:0; }
+  .cards { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:12px; margin-top:20px; }
+  .card { text-align:left; border:1px solid var(--line); background:var(--panel); color:var(--text); padding:18px; border-radius:14px; display:block; width:100%; }
+  .card:hover { border-color:var(--gold); transform:translateY(-2px); }
+  .card .symbol { color:var(--gold); font-size:1.6rem; margin-bottom:18px; }
+  .card strong { display:block; font-size:.95rem; margin-bottom:6px; }
+  .card small { color:var(--muted); }
+  footer { border-top:1px solid var(--line); padding:24px; text-align:center; color:#7f878e; font-size:.78rem; line-height:1.6; }
+  @media(max-width:760px) { main{padding-top:38px}.result{grid-template-columns:1fr}.visual{min-height:260px}.visual img{height:190px}.watch-icon{font-size:5rem;margin:18px 0}.cards{grid-template-columns:1fr}.searchbox{gap:4px}.searchbox button{padding:0 14px}.tag{display:none} }
+  @media(max-width:420px) { .specs{grid-template-columns:1fr 1fr}.searchbox input{padding:11px 6px;font-size:.9rem}.searchbox button{font-size:.82rem} }
+</style>
+</head>
+<body>
+<header>
+  <div class="brand">WATCH<span>VAULT</span></div>
+  <div class="tag">Watch intelligence, one search away</div>
+</header>
+<main>
+  <div class="eyebrow">The watch knowledge engine</div>
+  <h1>Every watch has a story.<br><em>Find yours.</em></h1>
+  <p class="intro">Search a watch by brand, model, or reference number. Explore its maker, design, movement, history, and documented public connections.</p>
+  <form class="searchbox" id="searchForm">
+    <input id="query" aria-label="Search watches" placeholder="Try “Rolex Submariner” or “Omega Speedmaster”…" autocomplete="off" />
+    <button id="searchButton" type="submit">Search ↗</button>
+  </form>
+  <div class="hint">Try a model name, a brand, or a reference number.</div>
+  <div class="chips">
+    <button class="chip" type="button" data-query="Rolex Submariner">Rolex Submariner</button>
+    <button class="chip" type="button" data-query="Omega Speedmaster">Omega Speedmaster</button>
+    <button class="chip" type="button" data-query="Cartier Tank">Cartier Tank</button>
+    <button class="chip" type="button" data-query="Casio G-Shock">Casio G-Shock</button>
+  </div>
+  <div id="status" class="status" role="status" aria-live="polite"></div>
+  <section class="result" id="result">
+    <div class="visual">
+      <div class="kicker">From the archive</div>
+      <div>
+        <div class="watch-icon" id="watchIcon">◷</div>
+        <img id="watchImage" alt="Watch image" />
+      </div>
+      <div class="visual-foot" id="visualCaption">A closer look at the timepiece.</div>
+    </div>
+    <div class="details">
+      <div class="kicker" id="brandLabel">WATCH PROFILE</div>
+      <h2 id="watchName">Watch name</h2>
+      <p class="subhead" id="watchSubhead"></p>
+      <p class="description" id="description"></p>
+      <div class="specs" id="specs"></div>
+      <h3 class="section-title">Maker & ownership notes</h3>
+      <div class="note" id="ownershipNote"></div>
+      <a class="source" id="sourceLink" href="#" target="_blank" rel="noopener noreferrer">Open source ↗</a>
+    </div>
+  </section>
+  <section class="featured">
+    <h3>Start with a legend</h3>
+    <p>Choose a popular model to explore the demo profiles.</p>
+    <div class="cards">
+      <button class="card" data-query="Rolex Submariner" type="button"><div class="symbol">◷</div><strong>Rolex Submariner</strong><small>The iconic dive-watch family</small></button>
+      <button class="card" data-query="Omega Speedmaster" type="button"><div class="symbol">◴</div><strong>Omega Speedmaster</strong><small>The famous Moonwatch lineage</small></button>
+      <button class="card" data-query="Cartier Tank" type="button"><div class="symbol">▯</div><strong>Cartier Tank</strong><small>Rectangular design classic</small></button>
+    </div>
+  </section>
+</main>
+<footer>
+  WATCHVAULT demo · Descriptions for unlisted searches are retrieved from Wikipedia when available.<br>
+  Not an authentication, valuation, or ownership-verification service. Specifications can vary by reference and production year.
+</footer>
+<script>
+const profiles = [
+ {match:["rolex submariner","submariner"],brand:"Rolex",name:"Submariner",year:"1953 (introduced)",maker:"Rolex",movement:"Varies by reference; automatic mechanical",case:"Oystersteel, gold, or combinations depending on model",type:"Dive watch",known:"Rotating dive bezel and water-resistant Oyster case",desc:"The Rolex Submariner is a dive-watch family introduced in 1953. Its clear dial, rotating bezel, and robust case helped make it one of the best-known designs in modern watchmaking.",source:"https://www.rolex.com/watches/submariner",owner:"Rolex manufactures the model. Specific watches may be privately owned, but private ownership is not generally public. Do not assume a celebrity or public figure owns a particular example without a reliable source."},
+ {match:["omega speedmaster","speedmaster"],brand:"Omega",name:"Speedmaster",year:"1957 (collection introduced)",maker:"Omega",movement:"Varies by reference; manual-wind and automatic versions exist",case:"Varies by model, commonly stainless steel",type:"Chronograph",known:"Chronograph design and association with NASA's lunar missions",desc:"The Omega Speedmaster began as a sports chronograph in 1957. The Speedmaster Professional became widely known for its role in NASA's crewed spaceflight programme and the Apollo lunar missions.",source:"https://www.omegawatches.com/",owner:"Omega is the maker. The collection has many references and editions. A documented public association with a model does not prove that a particular person owns a specific watch."},
+ {match:["cartier tank","tank louis cartier"],brand:"Cartier",name:"Tank",year:"1917 (design created)",maker:"Cartier",movement:"Varies by reference; quartz and mechanical versions exist",case:"Varies by model; steel, gold, and other materials",type:"Dress watch",known:"Rectangular case and brancards inspired by military tank tracks",desc:"Designed by Louis Cartier in 1917, the Tank is known for its rectangular case, clean geometry, and enduring dress-watch design. The family includes numerous sizes and variations.",source:"https://www.cartier.com/",owner:"Cartier created the design. Public figures have been associated with Tank watches in published reporting, but ownership claims should be checked against a source for the exact person and model."},
+ {match:["casio g-shock","g-shock"],brand:"Casio",name:"G-Shock",year:"1983 (first model DW-5000C)",maker:"Casio",movement:"Varies by model; quartz, solar, and connected options",case:"Resin, metal, or mixed materials depending on model",type:"Rugged digital/analog-digital watch",known:"Shock-resistant construction",desc:"Casio introduced G-Shock in 1983 with a design goal centred on toughness and shock resistance. Today the family ranges from straightforward digital watches to advanced solar and connected models.",source:"https://gshock.casio.com/",owner:"Casio is the maker. G-Shock is a broad family rather than one single watch, so specifications and prices depend on the exact model number."},
+ {match:["richard mille rm 11-03","rm 11-03"],brand:"Richard Mille",name:"RM 11-03",year:"Model-specific release; verify exact edition",maker:"Richard Mille",movement:"Automatic flyback chronograph, depending on edition",case:"Varies by edition, including advanced composites and metals",type:"Luxury sports chronograph",known:"Technical case materials and tonneau-shaped case",desc:"The RM 11-03 is part of Richard Mille's technically focused luxury-watch line. The collection includes multiple editions, so materials, movement details, and production information should be matched to the full reference.",source:"https://www.richardmille.com/",owner:"Richard Mille is the brand. Some editions have been publicly associated with athletes and entertainers, but a watch sighting or endorsement is not proof of current ownership."}
+];
+
+const $ = id => document.getElementById(id);
+const escapeHTML = value => String(value ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+function showProfile(p, sourceUrl) {
+  $("result").style.display = "grid";
+  $("brandLabel").textContent = p.brand || "SEARCH RESULT";
+  $("watchName").textContent = p.name || "Search result";
+  $("watchSubhead").textContent = p.year ? `Introduced / design era: ${p.year}` : "Information overview";
+  $("description").textContent = p.desc || "A short overview from an available reference source. Search for the exact reference number to find more specific details.";
+  const specs = [
+    ["Brand / maker",p.maker || p.brand || "Check source"],
+    ["Watch type",p.type || "Not confirmed"],
+    ["Movement",p.movement || "Not confirmed for this exact reference"],
+    ["Case / materials",p.case || "Varies by reference"],
+    ["Known for",p.known || "See linked source"]
+  ];
+  $("specs").innerHTML = specs.map(([label,value]) => `<div class="spec"><small>${escapeHTML(label)}</small><strong>${escapeHTML(value)}</strong></div>`).join("");
+  $("ownershipNote").textContent = p.owner || "Publicly documented ownership details were not confirmed in this result. The brand name alone does not establish who currently owns an individual watch.";
+  $("sourceLink").href = sourceUrl || p.source || "https://en.wikipedia.org/";
+  $("sourceLink").style.display = sourceUrl || p.source ? "inline-block" : "none";
+  $("visualCaption").textContent = p.brand ? `${p.brand} · ${p.name}` : "Reference-source overview";
+  $("watchIcon").style.display = "block";
+  $("watchImage").style.display = "none";
+  if (p.image) {
+    $("watchImage").src = p.image;
+    $("watchImage").alt = p.name || "Watch";
+    $("watchImage").style.display = "block";
+    $("watchIcon").style.display = "none";
+    $("watchImage").onerror = () => { $("watchImage").style.display="none"; $("watchIcon").style.display="block"; };
+  }
+}
+async function searchWatch(query) {
+  const q = query.trim();
+  if (!q) { $("status").textContent = "Type a watch name or brand to begin."; $("query").focus(); return; }
+  $("searchButton").disabled = true;
+  $("searchButton").textContent = "Searching…";
+  $("status").textContent = "Checking the watch archive…";
+  $("result").style.display = "none";
+  try {
+    const normalized = q.toLowerCase();
+    const match = profiles.find(p => p.match.some(term => normalized.includes(term) || term.includes(normalized)));
+    if (match) {
+      showProfile(match, match.source);
+      $("status").textContent = "Showing a curated demo profile. Check the linked maker source for current, reference-specific specifications.";
+      return;
+    }
+    // Live fallback: Wikipedia search and summary. This provides sourced general context,
+    // not a dedicated watch-specification or verified-ownership database.
+    const searchUrl = "https://en.wikipedia.org/w/api.php?action=query&list=search&srsearch=" + encodeURIComponent(q + " watch") + "&format=json&origin=*&srlimit=5";
+    const searchResponse = await fetch(searchUrl);
+    if (!searchResponse.ok) throw new Error("Search service unavailable");
+    const searchData = await searchResponse.json();
+    const candidates = searchData?.query?.search || [];
+    if (!candidates.length) {
+      $("status").textContent = "No matching reference found. Try the brand plus model name, or use the exact reference number.";
+      return;
+    }
+    const best = candidates.find(x => x.title.toLowerCase().includes(q.toLowerCase())) || candidates[0];
+    const summaryResponse = await fetch("https://en.wikipedia.org/api/rest_v1/page/summary/" + encodeURIComponent(best.title.replaceAll(" ","_")));
+    if (!summaryResponse.ok) throw new Error("Could not retrieve article summary");
+    const article = await summaryResponse.json();
+    showProfile({
+      brand:"Live reference search",
+      name:article.title || best.title,
+      year:article.description || "General reference result",
+      maker:"See article and manufacturer's official site",
+      type:"Not automatically verified",
+      movement:"Search the exact reference on the maker's site",
+      case:"Depends on model and production year",
+      known:"General reference information",
+      desc:article.extract || "The reference page did not provide a summary.",
+      owner:"This live search does not verify private ownership. Only include public-owner claims when reputable, specific sources document them. A person wearing a watch is not proof they currently own it.",
+      image:article.thumbnail?.source || null
+    }, article.content_urls?.desktop?.page || ("https://en.wikipedia.org/wiki/" + encodeURIComponent(best.title.replaceAll(" ","_"))));
+    $("status").textContent = "Live reference found. General description is from Wikipedia; exact technical specifications need a model-specific source.";
+  } catch (err) {
+    $("status").textContent = "Live search could not connect. Check your internet connection, or try one of the sample watch profiles.";
+  } finally {
+    $("searchButton").disabled = false;
+    $("searchButton").textContent = "Search ↗";
+  }
+}
+$("searchForm").addEventListener("submit", event => { event.preventDefault(); searchWatch($("query").value); });
+document.querySelectorAll("[data-query]").forEach(button => button.addEventListener("click", () => {
+  const q = button.dataset.query; $("query").value = q; searchWatch(q);
+}));
+</script>
+</body>
+</html>
